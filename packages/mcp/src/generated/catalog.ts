@@ -15659,7 +15659,7 @@ export const ACTIONS: CatalogAction[] = [
           "user_id": 10001,
           "message": "你好"
         },
-        "notes": "替换目标好友 QQ 号；临时会话需另传来源 group_id。"
+        "notes": "替换目标好友 QQ 号；临时会话可省略 group_id，自动沿用该用户最近一条私聊消息的来源群。"
       }
     ],
     "readOnly": false,
@@ -15689,7 +15689,8 @@ export const ACTIONS: CatalogAction[] = [
         "schema": {
           "type": "integer",
           "minimum": 0
-        }
+        },
+        "desc": "临时会话来源群号；好友会话忽略该值，缺省时自动从最近私聊消息推断"
       },
       {
         "name": "auto_escape",
@@ -15715,7 +15716,8 @@ export const ACTIONS: CatalogAction[] = [
         },
         "group_id": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "description": "临时会话来源群号；好友会话忽略该值，缺省时自动从最近私聊消息推断"
         },
         "auto_escape": {
           "type": "boolean",

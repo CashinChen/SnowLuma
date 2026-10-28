@@ -140,7 +140,7 @@ export const actions = [
                     user_id: 10001,
                     message: '你好',
                 },
-                notes: '替换目标好友 QQ 号；临时会话需另传来源 group_id。',
+                notes: '替换目标好友 QQ 号；临时会话可省略 group_id，自动沿用该用户最近一条私聊消息的来源群。',
             },
         ],
         returnsSchema: messageResultSchema,
@@ -151,9 +151,16 @@ export const actions = [
             message: f.message(),
             // Optional source group: reply into that group's temp session (临时会话)
             // instead of a friend chat. int({min:0}) rather than groupId (which
-            // rejects 0): a client that fills every field with group_id:0 must keep
-            // working as a plain private send, so 0/absent means "no temp session".
-            group_id: f.int({ min: 0 }).optional(),
+            // rejects 0) keeps clients that fill every field with group_id:0 working.
+            // Resolution depends on the relationship: a friend always takes the
+            // direct c2c chat, so 0/absent means "plain friend private send"; a
+            // non-friend uses a positive value as-is and infers it from the peer's
+            // latest inbound private message when the field is 0/absent
+            // (see modules/private-send-target.ts).
+            group_id: f
+                .int({ min: 0 })
+                .optional()
+                .describe('临时会话来源群号；好友会话忽略该值，缺省时自动从最近私聊消息推断'),
             auto_escape: f.bool().default(false),
         },
         run: async (p, ctx) => {

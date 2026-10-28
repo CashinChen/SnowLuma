@@ -47,7 +47,7 @@ function makeContext(receiptOrReceipts: Receipt | Receipt[] = RECEIPT): {
     const events = new Map<number, JsonObject>();
     const dispatchEvent = vi.fn<(event: JsonObject) => void>();
     const bridge = {
-        identity: { nickname: 'SnowLuma' },
+        identity: { nickname: 'SnowLuma', findFriend: () => null },
         apis: {
             message: {
                 sendPrivate: vi.fn(async () => nextReceipt()),
@@ -91,6 +91,7 @@ function makeContext(receiptOrReceipts: Receipt | Receipt[] = RECEIPT): {
             findEvent: (messageId: number) => events.get(messageId) ?? null,
             findMeta: () => null,
             resolveReplySequence: () => null,
+            listSessionEvents: () => [],
             storeEvent: (
                 messageId: number,
                 _isGroup: boolean,

@@ -28,6 +28,7 @@ import {
 } from './message-id';
 import { MessageStore } from './message-store';
 import { sendGroupMessage, sendPrivateMessage } from './modules/message-actions';
+import { resolvePrivateSendGroupId } from './modules/private-send-target';
 import {
     buildStatusText,
     matchesStatusCommand,
@@ -619,7 +620,11 @@ export class OneBotInstance {
         if (isGroup) {
             await sendGroupMessage(this.ctx, sessionId, text, true);
         } else {
-            await sendPrivateMessage(this.ctx, sessionId, text, true);
+            // The status command can arrive through a group temp session. Resolve
+            // the source group like an Action-driven private send would, or the
+            // reply fails with QQ's "add friend first" error.
+            const tempGroupId = await resolvePrivateSendGroupId(this.ctx, sessionId);
+            await sendPrivateMessage(this.ctx, sessionId, text, true, tempGroupId);
         }
     }
 

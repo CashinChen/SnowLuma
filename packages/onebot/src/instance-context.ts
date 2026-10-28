@@ -37,6 +37,7 @@ import {
     setEssenceMessage,
     uploadForwardMessage,
 } from './modules/message-actions';
+import { resolvePrivateSendGroupId } from './modules/private-send-target';
 import { handleGroupAddRequest } from './modules/request-actions';
 import type { ReactionStore } from './reaction-store';
 import {
@@ -86,17 +87,22 @@ export function buildApiContext(ref: OneBotInstanceContext): ApiActionContext {
             ),
         canSendImage: () => true,
         canSendRecord: () => true,
-        sendPrivateMessage: (userId, message, autoEscape, tempGroupId) =>
-            sendPrivateMessage(
+        // Resolve the target conversation before sending: friends always go
+        // direct, while a non-friend without an explicit group falls back to the
+        // group of their latest inbound private message (temp-session reply).
+        sendPrivateMessage: async (userId, message, autoEscape, tempGroupId) => {
+            const groupId = await resolvePrivateSendGroupId(ref, userId, tempGroupId);
+            return await sendPrivateMessage(
                 ref,
                 userId,
                 message,
                 autoEscape,
-                tempGroupId,
-                tempGroupId === undefined
+                groupId,
+                groupId === undefined
                     ? async (event) => await ref.dispatchEvent(event, 'send')
                     : undefined,
-            ),
+            );
+        },
         sendGroupMessage: (groupId, message, autoEscape) =>
             sendGroupMessage(ref, groupId, message, autoEscape),
         deleteMessage: (_messageId, meta) => deleteMessage(bridge, meta),

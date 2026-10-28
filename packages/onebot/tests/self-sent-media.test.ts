@@ -70,7 +70,7 @@ function fixture() {
             messageStore,
             mediaStore,
             bridge: {
-                identity: { nickname: 'self' },
+                identity: { nickname: 'self', findFriend: () => null },
                 apis: { message: { sendPrivate: send, sendGroup: send }, groupFile },
             },
             converterCtx: {
